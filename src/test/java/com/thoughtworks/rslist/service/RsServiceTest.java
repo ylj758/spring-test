@@ -27,7 +27,8 @@ class RsServiceTest {
   @Mock RsEventRepository rsEventRepository;
   @Mock UserRepository userRepository;
   @Mock VoteRepository voteRepository;
-  @Mock RankDtoRepository rankDtoRepository;
+  @Mock
+  RankRepository rankRepository;
   @Mock RankRecordRepository rankRecordRepository;
   LocalDateTime localDateTime;
   Vote vote;
@@ -35,18 +36,18 @@ class RsServiceTest {
   @BeforeEach
   void setUp() {
     initMocks(this);
-    rsService = new RsService(rsEventRepository, userRepository, voteRepository, rankDtoRepository, rankRecordRepository);
+    rsService = new RsService(rsEventRepository, userRepository, voteRepository, rankRepository, rankRecordRepository);
     localDateTime = LocalDateTime.now();
     vote = Vote.builder().voteNum(2).rsEventId(1).time(localDateTime).userId(1).build();
   }
 
   @Test
   void should_buy_rank_when_rank_is_not_bought() throws Exception {
-    when(rankDtoRepository.findRankDtoByRankPos(anyInt())).thenReturn(Optional.empty());
+    when(rankRepository.findRankDtoByRankPos(anyInt())).thenReturn(Optional.empty());
     Trade trade = new Trade(5, 1);
     int buyRsEventId = 1;
     rsService.buy(trade, buyRsEventId);
-    verify(rankDtoRepository, times(1)).save(any());
+    verify(rankRepository, times(1)).save(any());
     verify(rankRecordRepository, times(1)).save(any());
   }
 
@@ -59,9 +60,9 @@ class RsServiceTest {
             .price(5)
             .rsEventId(1)
             .build();
-    when(rankDtoRepository.findRankDtoByRankPos(anyInt())).thenReturn(Optional.of(rankDto));
+    when(rankRepository.findRankDtoByRankPos(anyInt())).thenReturn(Optional.of(rankDto));
     rsService.buy(trade, buyRsEventId);
-    verify(rankDtoRepository, times(1)).save(any());
+    verify(rankRepository, times(1)).save(any());
     verify(rankRecordRepository, times(1)).save(any());
   }
 
@@ -74,7 +75,7 @@ class RsServiceTest {
             .price(5)
             .rsEventId(1)
             .build();
-    when(rankDtoRepository.findRankDtoByRankPos(anyInt())).thenReturn(Optional.of(rankDto));
+    when(rankRepository.findRankDtoByRankPos(anyInt())).thenReturn(Optional.of(rankDto));
     assertThrows(Exception.class, () -> rsService.buy(trade, buyRsEventId));
   }
   @Test

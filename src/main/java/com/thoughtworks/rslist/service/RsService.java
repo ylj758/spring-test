@@ -4,7 +4,6 @@ import com.thoughtworks.rslist.domain.Trade;
 import com.thoughtworks.rslist.domain.Vote;
 import com.thoughtworks.rslist.dto.*;
 import com.thoughtworks.rslist.repository.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -14,16 +13,16 @@ public class RsService {
     final RsEventRepository rsEventRepository;
     final UserRepository userRepository;
     final VoteRepository voteRepository;
-    final RankDtoRepository rankDtoRepository;
+    final RankRepository rankRepository;
     final RankRecordRepository rankRecordRepository;
 
     public RsService(RsEventRepository rsEventRepository, UserRepository userRepository,
-                     VoteRepository voteRepository, RankDtoRepository rankDtoRepository,
+                     VoteRepository voteRepository, RankRepository rankRepository,
                      RankRecordRepository rankRecordRepository) {
         this.rsEventRepository = rsEventRepository;
         this.userRepository = userRepository;
         this.voteRepository = voteRepository;
-        this.rankDtoRepository = rankDtoRepository;
+        this.rankRepository = rankRepository;
         this.rankRecordRepository = rankRecordRepository;
     }
 
@@ -54,10 +53,10 @@ public class RsService {
 
     public void buy(Trade trade, int eventId) throws Exception {
         int rank = trade.getRank();
-        Optional<RankDto> optionalRankDto = rankDtoRepository.findRankDtoByRankPos(rank);
+        Optional<RankDto> optionalRankDto = rankRepository.findRankDtoByRankPos(rank);
         if (!optionalRankDto.isPresent()) {
             RankDto rankDto = RankDto.builder().rankPos(rank).price(trade.getAmount()).rsEventId(eventId).build();
-            rankDtoRepository.save(rankDto);
+            rankRepository.save(rankDto);
             rankRecordRepository.save(rankDtoConvertRankRecordDto(rankDto));
         } else {
             RankDto rankDto = optionalRankDto.get();
@@ -65,7 +64,7 @@ public class RsService {
                 rsEventRepository.deleteById(rankDto.getRsEventId());
                 rankDto.setRsEventId(eventId);
                 rankDto.setPrice(trade.getAmount());
-                rankDtoRepository.save(rankDto);
+                rankRepository.save(rankDto);
                 rankRecordRepository.save(rankDtoConvertRankRecordDto(rankDto));
             } else {
                 throw new Exception("buy rank failed");
