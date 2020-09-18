@@ -12,6 +12,7 @@ import com.thoughtworks.rslist.repository.UserRepository;
 import com.thoughtworks.rslist.service.RsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -96,8 +97,13 @@ public class RsController {
   }
 
   @PostMapping("/rs/buy/{id}")
-  public ResponseEntity buy(@PathVariable int id, @RequestBody Trade trade){
-    rsService.buy(trade, id);
+  @Transactional
+  public ResponseEntity buy(@PathVariable int id, @RequestBody Trade trade) throws Exception {
+    try {
+      rsService.buy(trade, id);
+    }catch(Exception ex){
+      return ResponseEntity.badRequest().build();
+    }
     return ResponseEntity.ok().build();
   }
 

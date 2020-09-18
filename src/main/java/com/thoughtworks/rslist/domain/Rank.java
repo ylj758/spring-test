@@ -6,10 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Trade {
-    private int amount;
-    private int rank;
+@Builder
+public class Rank {
+    private int rankPos;
+    private int price;
+    private int rsEventId;
 }
