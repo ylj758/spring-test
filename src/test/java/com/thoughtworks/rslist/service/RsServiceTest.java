@@ -50,6 +50,20 @@ class RsServiceTest {
     verify(rankRecordRepository, times(1)).save(any());
   }
 
+  @Test
+  void should_buy_rank_when_rank_is_bought_and_amount_is_enough() throws Exception {
+    Trade trade = new Trade(10, 1);
+    int buyRsEventId = 2;
+    RankDto rankDto = RankDto.builder()
+            .rankPos(1)
+            .price(5)
+            .rsEventId(1)
+            .build();
+    when(rankDtoRepository.findRankDtoByRankPos(anyInt())).thenReturn(Optional.of(rankDto));
+    rsService.buy(trade, buyRsEventId);
+    verify(rankDtoRepository, times(1)).save(any());
+    verify(rankRecordRepository, times(1)).save(any());
+  }
 
   @Test
   void shouldVoteSuccess() {
