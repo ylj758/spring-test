@@ -75,18 +75,47 @@ class RsControllerTest {
 
     @Test
     void should_buy_rank_when_rank_is_bought_and_amount_is_enough() throws Exception {
+        UserDto save = userRepository.save(userDto);
+        RsEventDto rsEventDto1 =
+                RsEventDto.builder().keyword("无分类").eventName("第一条事件").user(save).build();
+        RsEventDto rsEventDto2 =
+                RsEventDto.builder().keyword("无分类").eventName("第二条事件").user(save).build();
+        rsEventRepository.save(rsEventDto1);
+        rsEventRepository.save(rsEventDto2);
+        RankDto rankDto = RankDto.builder().rankPos(1).rsEventId(2).price(5).build();
+        rankRepository.save(rankDto);
+        RankRecordDto rankRecordDto = RankRecordDto.builder().rankPos(1).rsEventId(2).price(5).build();
+        rankRecordRepository.save(rankRecordDto);
+
         Trade trade = new Trade(10, 1);
-        int buyRsEventId = 2;
-        RankDto rankDto = RankDto.builder()
-                .rankPos(1)
-                .price(5)
-                .rsEventId(1)
-                .build();
+        mockMvc.perform(post("/rs/buy/3")
+                .content(new ObjectMapper().writeValueAsString(trade))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        assertEquals(rankRepository.findAll().size(), 1);
+        assertEquals(rankRecordRepository.findAll().size(), 2);
+        assertEquals(rsEventRepository.findById(3).get().getEventName(), "第二条事件");
+        assertEquals(rsEventRepository.findById(2).isPresent(), false);
+        assertEquals(rankRepository.findById(4).get().getPrice(), 10);
+        assertEquals(rankRepository.findById(4).get().getRsEventId(), 3);
 
     }
 
     @Test
     void should_throw_exception_when_amount_is_not_enough() {
+        UserDto save = userRepository.save(userDto);
+        RsEventDto rsEventDto1 =
+                RsEventDto.builder().keyword("无分类").eventName("第一条事件").user(save).build();
+        RsEventDto rsEventDto2 =
+                RsEventDto.builder().keyword("无分类").eventName("第二条事件").user(save).build();
+        rsEventRepository.save(rsEventDto1);
+        rsEventRepository.save(rsEventDto2);
+        RankDto rankDto = RankDto.builder().rankPos(1).rsEventId(2).price(5).build();
+        rankRepository.save(rankDto);
+        RankRecordDto rankRecordDto = RankRecordDto.builder().rankPos(1).rsEventId(2).price(5).build();
+        rankRecordRepository.save(rankRecordDto);
+
         Trade trade = new Trade(2, 1);
         int buyRsEventId = 2;
         RankDto rankDto = RankDto.builder()

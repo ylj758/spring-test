@@ -13,6 +13,7 @@ public interface RankRepository extends CrudRepository<RankDto, Integer> {
     @Override
     List<RankDto> findAll();
 
+
     Optional<RankDto> findRankDtoByRankPos(int rankPos);
 
 }
