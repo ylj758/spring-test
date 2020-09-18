@@ -66,6 +66,18 @@ class RsServiceTest {
   }
 
   @Test
+  void should_throw_exception_when_amount_is_not_enough() {
+    Trade trade = new Trade(2, 1);
+    int buyRsEventId = 2;
+    RankDto rankDto = RankDto.builder()
+            .rankPos(1)
+            .price(5)
+            .rsEventId(1)
+            .build();
+    when(rankDtoRepository.findRankDtoByRankPos(anyInt())).thenReturn(Optional.of(rankDto));
+    assertThrows(Exception.class, () -> rsService.buy(trade, buyRsEventId));
+  }
+  @Test
   void shouldVoteSuccess() {
     // given
 
