@@ -1,15 +1,18 @@
 package com.thoughtworks.rslist.api;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thoughtworks.rslist.domain.Trade;
 import com.thoughtworks.rslist.dto.*;
 import com.thoughtworks.rslist.repository.*;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
@@ -31,6 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class RsControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -48,9 +52,6 @@ class RsControllerTest {
 
     @BeforeEach
     void setUp() {
-        voteRepository.deleteAll();
-        rsEventRepository.deleteAll();
-        userRepository.deleteAll();
         userDto =
                 UserDto.builder()
                         .voteNum(10)
@@ -60,6 +61,15 @@ class RsControllerTest {
                         .age(19)
                         .userName("idolice")
                         .build();
+    }
+
+    @AfterEach
+    void tearDown(){
+        voteRepository.deleteAll();
+        rsEventRepository.deleteAll();
+        userRepository.deleteAll();
+        rankRecordRepository.deleteAll();
+        rankRepository.deleteAll();
     }
 
     @Test
@@ -103,7 +113,7 @@ class RsControllerTest {
     }
 
     @Test
-    void should_throw_exception_when_amount_is_not_enough() {
+    void should_throw_exception_when_amount_is_not_enough() throws Exception {
         UserDto save = userRepository.save(userDto);
         RsEventDto rsEventDto1 =
                 RsEventDto.builder().keyword("无分类").eventName("第一条事件").user(save).build();
@@ -117,13 +127,10 @@ class RsControllerTest {
         rankRecordRepository.save(rankRecordDto);
 
         Trade trade = new Trade(2, 1);
-        int buyRsEventId = 2;
-        RankDto rankDto = RankDto.builder()
-                .rankPos(1)
-                .price(5)
-                .rsEventId(1)
-                .build();
-
+        mockMvc.perform(post("/rs/buy/3")
+                .content(new ObjectMapper().writeValueAsString(trade))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
