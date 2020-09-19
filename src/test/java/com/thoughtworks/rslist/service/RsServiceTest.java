@@ -2,10 +2,7 @@ package com.thoughtworks.rslist.service;
 
 import com.thoughtworks.rslist.domain.Trade;
 import com.thoughtworks.rslist.domain.Vote;
-import com.thoughtworks.rslist.dto.RankDto;
-import com.thoughtworks.rslist.dto.RsEventDto;
-import com.thoughtworks.rslist.dto.UserDto;
-import com.thoughtworks.rslist.dto.VoteDto;
+import com.thoughtworks.rslist.dto.*;
 import com.thoughtworks.rslist.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,6 +44,16 @@ class RsServiceTest {
     Trade trade = new Trade(5, 1);
     int buyRsEventId = 1;
     rsService.buy(trade, buyRsEventId);
+//    RankDto rankDto = RankDto.builder()
+//            .rsEventId(buyRsEventId)
+//            .price(trade.getAmount())
+//            .rankPos(trade.getRank())
+//            .build();
+//    RankRecordDto rankRecordDto = RankRecordDto.builder()
+//            .rsEventId(buyRsEventId)
+//            .price(trade.getAmount())
+//            .rankPos(trade.getRank())
+//            .build();
     verify(rankRepository, times(1)).save(any());
     verify(rankRecordRepository, times(1)).save(any());
   }
@@ -62,8 +69,10 @@ class RsServiceTest {
             .build();
     when(rankRepository.findRankDtoByRankPos(anyInt())).thenReturn(Optional.of(rankDto));
     rsService.buy(trade, buyRsEventId);
-    verify(rankRepository, times(1)).save(any());
-    verify(rankRecordRepository, times(1)).save(any());
+    RankRecordDto rankRecordDto = RankRecordDto.builder().price(rankDto.getPrice()).rankPos(rankDto.getRankPos())
+            .rsEventId(rankDto.getRsEventId()).build();
+    verify(rankRepository, times(1)).save(rankDto);
+    verify(rankRecordRepository, times(1)).save(rankRecordDto);
   }
 
   @Test
